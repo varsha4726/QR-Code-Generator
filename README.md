@@ -1,3 +1,6 @@
+## 🌐 Live Demo
+https://varsha4726.github.io/QR-Code-Generator/
+
 # QR-Code-Generator
 A simple and responsive QR Code Generator built using HTML, CSS, and JavaScript
 This project allows users to generate QR codes instantly for any text or URL input
