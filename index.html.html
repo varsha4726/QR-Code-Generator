@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>QR Code Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f172a, #020617);
+      padding: 16px;
+      color: #e5e7eb;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 420px;
+      background: #020617;
+      border-radius: 18px;
+      padding: 20px 18px 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      border: 1px solid rgba(148,163,184,0.2);
+    }
+
+    .app-header {
+      margin-bottom: 14px;
+    }
+
+    .app-header h1 {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+
+    .app-header p {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .field {
+      margin-top: 12px;
+    }
+
+    .field label {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      padding: 9px 10px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 70px;
+      max-height: 140px;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px rgba(59,130,246,0.5);
+    }
+
+    .buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      flex: 1;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      transition: transform 0.1s, box-shadow 0.1s, background 0.2s, opacity 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: #e5e7eb;
+      box-shadow: 0 8px 18px rgba(37,99,235,0.5);
+    }
+
+    .btn-secondary {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 10px rgba(15,23,42,0.8);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .preview {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px dashed #1f2937;
+      text-align: center;
+    }
+
+    .preview-title {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-bottom: 10px;
+    }
+
+    .qr-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #020617;
+      border-radius: 16px;
+      padding: 10px;
+      border: 1px solid #1f2937;
+      min-height: 140px;
+      min-width: 140px;
+    }
+
+    #qrImage {
+      max-width: 100%;
+      height: auto;
+      display: none;
+    }
+
+    .placeholder {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    .note {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: #6b7280;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        padding: 16px 14px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="app-header">
+      <h1>QR Code Generator</h1>
+      <p>Enter any text or URL and generate a QR code using api.qrserver.com</p>
+    </div>
+
+    <!-- Text / URL input -->
+    <div class="field">
+      <label for="qrText">Text / URL</label>
+      <textarea id="qrText" placeholder="Example: https://shafolio.com or 'Hello Varsha 👋'"></textarea>
+    </div>
+
+    <!-- Size selector -->
+    <div class="field">
+      <label for="qrSize">Size</label>
+      <select id="qrSize">
+        <option value="150">150 x 150</option>
+        <option value="200" selected>200 x 200</option>
+        <option value="250">250 x 250</option>
+        <option value="300">300 x 300</option>
+      </select>
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+      <button id="generateBtn" class="btn btn-primary">Generate QR</button>
+      <button id="downloadBtn" class="btn btn-secondary" disabled>Download</button>
+    </div>
+
+    <!-- QR Preview -->
+    <div class="preview">
+      <div class="preview-title">Preview</div>
+      <div class="qr-box">
+        <img id="qrImage" alt="QR Code" />
+        <span id="placeholderText" class="placeholder">
+          QR code will appear here ✨
+        </span>
+      </div>
+      <div class="note">Powered by api.qrserver.com</div>
+    </div>
+  </div>
+
+  <script>
+    const qrText = document.getElementById("qrText");
+    const qrSize = document.getElementById("qrSize");
+    const generateBtn = document.getElementById("generateBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const qrImage = document.getElementById("qrImage");
+    const placeholderText = document.getElementById("placeholderText");
+
+    const API_BASE = "https://api.qrserver.com/v1/create-qr-code/";
+
+    // Build the QR code URL for the API
+    function buildQrUrl(text, size) {
+      const encodedText = encodeURIComponent(text);
+      const sizeParam = `${size}x${size}`;
+      // You can add more params like margin, color etc.
+      return `${API_BASE}?data=${encodedText}&size=${sizeParam}`;
+    }
+
+    // Generate QR when button clicked
+    generateBtn.addEventListener("click", () => {
+      const value = qrText.value.trim();
+      const size = qrSize.value;
+
+      if (!value) {
+        alert("Please enter some text or a URL to generate QR code.");
+        qrText.focus();
+        return;
+      }
+
+      const url = buildQrUrl(value, size);
+
+      // Show loading style (optional)
+      generateBtn.textContent = "Generating...";
+      generateBtn.disabled = true;
+
+      // We can directly set img src to API URL
+      qrImage.onload = () => {
+        qrImage.style.display = "block";
+        placeholderText.style.display = "none";
+        generateBtn.textContent = "Generate QR";
+        generateBtn.disabled = false;
+        downloadBtn.disabled = false;
+      };
+
+      qrImage.onerror = () => {
+        alert("Failed to load QR code. Please try again.");
+        generateBtn.textContent = "Generate QR";
+        generateBtn.disabled = false;
+      };
+
+      qrImage.src = url;
+    });
+
+    // Allow pressing Enter + Ctrl to generate quickly (optional shortcut)
+    qrText.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        generateBtn.click();
+      }
+    });
+
+    // Download QR image
+    downloadBtn.addEventListener("click", async () => {
+      if (!qrImage.src) return;
+
+      try {
+        // Fetch the image as a blob so we can force download with a filename
+        const response = await fetch(qrImage.src);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "qr-code.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        // Fallback: open in new tab if something fails
+        window.open(qrImage.src, "_blank");
+      }
+    });
+  </script>
+</body>
+</html>
